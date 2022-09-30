@@ -20,8 +20,8 @@ Note that rendering is quite unstable and may affect some unrelated results.
 
 
 ## How to take it from here :point_up_2:
-For further work, can prepare layoutlmv3 dataset from annotation file and make it easy to train proper detection model which will feed himself afterwards.
-Choose better OCR service may also impact the results.
+- can prepare layoutlmv3 dataset from annotation file and make it easy to train proper detection model which will feed himself afterwards.
+- use better OCR service to raise detection accuracy.
 
 
 ## Short video example
