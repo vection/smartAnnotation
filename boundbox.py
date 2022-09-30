@@ -41,7 +41,6 @@ class BoundBox:
         :param p3: point 3
         :param p4: point 4
         :return: tuple of corners in sorted order
-        TODO : implement a mechanism to check points are on the same line
         """
 
         # if any of the values is null return without sorting
@@ -203,138 +202,6 @@ class BoundBox:
 
         return BoundBox(p1, p2, p3, p4, text_value)
 
-    @classmethod
-    def google_ocr_boxes(cls, data):
-        """
-        create a list of list of boxes from results from google ocr data
-        here the result is a list of list because multiple pages can be parsed together
-        and a list of boxes is created for each page
-        :param data: google ocr response data as dict
-        :return: list(list(boxes))
-        """
-
-        page_list = []
-        google_response = data['responses']
-
-        # fill zero values for places where google ocr omitted values
-        for page in google_response:
-            for annotation in page['textAnnotations']:
-                for vertex in range(len(annotation['boundingPoly']['vertices'])):
-                    if 'x' not in annotation['boundingPoly']['vertices'][vertex]:
-                        annotation['boundingPoly']['vertices'][vertex]['x'] = 0
-
-                    elif 'y' not in annotation['boundingPoly']['vertices'][vertex]:
-                        annotation['boundingPoly']['vertices'][vertex]['y'] = 0
-
-        for page in google_response:
-            box_list = []
-            text_annotations = page['textAnnotations'][1:]
-
-            for annotation in text_annotations:
-                box = cls.create_box(annotation['boundingPoly']['vertices'][0]['x'],
-                                     annotation['boundingPoly']['vertices'][0]['y'],
-                                     annotation['boundingPoly']['vertices'][1]['x'],
-                                     annotation['boundingPoly']['vertices'][1]['y'],
-                                     annotation['boundingPoly']['vertices'][2]['x'],
-                                     annotation['boundingPoly']['vertices'][2]['y'],
-                                     annotation['boundingPoly']['vertices'][3]['x'],
-                                     annotation['boundingPoly']['vertices'][3]['y'],
-                                     annotation['description'])
-                box_list.append(box)
-            page_list.append(box_list)
-
-        return page_list
-
-    @classmethod
-    def labelimg_xml_boxes(cls, xml_path):
-        tree = ET.parse(xml_path)
-        root = tree.getroot()
-
-        box_list = []
-
-        for member in root.findall('object'):
-            text = member[0].text
-            corner_1 = Point(int(member[4][0].text), int(member[4][1].text))
-            corner_2 = Point(int(member[4][2].text), int(member[4][3].text))
-            box = cls.create_box_from_corners(corner_1, corner_2, text_value=text)
-            box_list.append(box)
-
-        return box_list
-
-    @classmethod
-    def box_from_contour(cls, countour):
-        if len(countour) != 4:
-            raise IndexError('need to approximate the contour to 4 sided polygon, currently contains {} '
-                             'sides'.format(len(countour)))
-
-        points = countour.reshape(4, 2)
-
-        return cls.box_from_array(points)
-
-    @classmethod
-    def box_from_array(cls, array):
-        if len(array) != 4:
-            raise IndexError('need to approximate the contour to 4 sided polygon, currently contains {} '
-                             'sides'.format(len(array)))
-
-        p1, p2, p3, p4 = cls.array_to_points(array)
-
-        return cls(p1, p2, p3, p4)
-
-    @classmethod
-    def from_center(cls, center_x, center_y, length, breadth, angle):
-        """
-        :param center_x: x coordinate of center
-        :param center_y: y coordinate of center
-        :param length: length of rectangle
-        :param breadth: breadth of rectangle
-        :param angle: angle in radian with respect to lower x axis
-        :return:
-        """
-
-        p1 = Point(center_x - length / 2, center_y - breadth / 2)
-        p2 = Point(center_x + length / 2, center_y - breadth / 2)
-        p3 = Point(center_x + length / 2, center_y + breadth / 2)
-        p4 = Point(center_x - length / 2, center_y + breadth / 2)
-
-        box = cls(p1, p2, p3, p4)
-        box.rotate(angle)
-
-        return box
-
-    def perspective_wrap(self, img):
-
-        width_1 = self._p3 - self._p4
-        width_2 = self._p2 - self._p1
-
-        height_1 = self._p3 - self._p2
-        height_2 = self._p4 - self._p1
-
-        # take the maximum of the width and height for the new image
-
-        max_width = max(int(width_1), int(width_2))
-        max_height = max(int(height_1), int(height_2))
-
-        # construct our destination points
-
-        dst = np.array([
-            [0, 0],
-            [max_width - 1, 0],
-            [max_width - 1, max_height - 1],
-            [0, max_height - 1]], dtype="float32")
-
-        # calculate the perspective transform matrix and warp
-        # the perspective to grab the screen
-        rect = np.zeros((4, 2), dtype="float32")
-        rect[0] = [self._p1.x, self._p1.y]
-        rect[1] = [self._p2.x, self._p2.y]
-        rect[2] = [self._p3.x, self._p3.y]
-        rect[3] = [self._p4.x, self._p4.y]
-
-        m = cv2.getPerspectiveTransform(rect, dst)
-        warp = cv2.warpPerspective(img, m, (max_width, max_height))
-
-        return warp
 
     def scale_box(self, ratio_w, ratio_h):
 
@@ -498,7 +365,6 @@ class BoundBox:
             new_text = box_1.text_value + ' ' + box_2.text_value
 
         try:
-            bb_list = [box_1, box_2]
             merged_box = BoundBox(p1, p2, p3, p4, new_text.strip())
         except TypeError as err:
             if not box_1.p1.x or not box_1.p4.x:
@@ -511,7 +377,7 @@ class BoundBox:
         return merged_box
 
     @staticmethod
-    def compare_box_horizontally(box1, box2, dx, compare_angle=False, voverlap=False):
+    def compare_box_horizontally(box1, box2, dx, compare_angle=False):
         """
         compare the boxes to check whether box2 is on the right side of box1 and they are close
             enough and parallel
@@ -544,19 +410,9 @@ class BoundBox:
         box_height = box1.p2 - box1.p3
         # check they lie on the same x axis. We look for difference in y axis
 
-        if voverlap:
-            #             if not ((box1.p1.y <= box2.p1.y <= box1.p3.y or box1.p1.y <= box2.p3.y <= box1.p3.y) or
-            #                     (box2.p1.y <= box1.p1.y <= box2.p3.y or box2.p1.y <= box1.p3.y <= box2.p3.y)):
-            yoverlap = max(0, min(box1.p3.y, box2.p3.y) - max(box1.p1.y, box2.p1.y))
-            box1_y = box1.p3.y - box1.p1.y
-            box2_y = box2.p3.y - box2.p1.y
-            pecent_overlap = max((yoverlap / box1_y), (yoverlap / box2_y))
-            if pecent_overlap < voverlap:
-                return False
-        else:
-            dy = box_height / 3
-            if abs(box1.p3.y - box2.p4.y) > dy:
-                return False
+        dy = box_height / 3
+        if abs(box1.p3.y - box2.p4.y) > dy:
+            return False
 
         # check distance between boxes
         distance_threshold = box_height * dx
@@ -636,44 +492,6 @@ class BoundBox:
 
         return dx >= y
 
-    @staticmethod
-    def bb_verticle_compare_numpy(a, b, dy=np.inf, xmatch=0.1):
-
-        """
-        a: list of box coordintes [[x0,y0,x3,y3], ...]
-            where x0,y0 are the coordinates of the top left corner of a box, x3, y3 are the right bottom corner of the box
-        b: the same list but shifted by N boxes
-        """
-
-        # get min/max of relevant coordinates to find intersection
-        ab = np.stack([a, b], axis=0)
-        abmax = np.max(ab, axis=0)
-        abmin = np.min(ab, axis=0)
-        ab_xarea = (ab[:, :, 2] - ab[:, :, 0])
-        ab_min_xarea = np.min(ab_xarea, axis=0)
-
-        xinter = abmin[:, 2] - abmax[:, 0]  # find if there's intersection in x axes
-
-        xinter_area_prec = xinter / ab_min_xarea
-
-        result = np.zeros_like(a)
-        # y_dist = abmin[:,3] - abmax[:,1]
-        # np.place(y_dist, y_dist < 0, 0)
-
-        b_rolled = np.roll(b, 2, axis=1)  # find distance in the y axies
-        y_distance = np.abs(a - b_rolled)
-        y_distance_bottom_to_top = y_distance[:, 1]
-        y_distance_top_to_bottom = y_distance[:, 3]
-
-        y_distances_stacked = np.stack([y_distance_bottom_to_top, y_distance_top_to_bottom])
-        y_min_distance = np.min(y_distances_stacked, axis=0)
-
-        np.place(y_min_distance, y_min_distance < 0, 0)
-        np.place(y_min_distance, y_min_distance > dy, -100)
-        np.place(y_min_distance, xinter < 0, -50)
-        np.place(y_min_distance, xinter_area_prec < xmatch, -50)
-
-        return y_min_distance
 
     @staticmethod
     def do_y_match(a, dy=np.inf, xmatch=0.1):
