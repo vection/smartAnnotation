@@ -1,0 +1,11 @@
+{
+    "r_number_key": [
+        "customer invoices"
+    ],
+    "salesperson_key": [
+        "salesperson"
+    ],
+    "client_name_key": [
+        "customer"
+    ]
+}
