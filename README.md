@@ -11,7 +11,9 @@ First we set BBoxWidget with correct parameters which is list of images (dependi
 In annotation tool class there are few types of values - number,text; this can help to filter final value that will be registered in dataset.
 By default all values declared as text.
 
-After marking first VALUE class the tool tries to find the corresponding key and mark it, if it wrong you can fix and change the box.
+After marking first VALUE class the tool tries to find the corresponding text value from ocr and record it in annotation file.
+
+Extra feature available to detect also corresponding keys automatically using the vocabulary. 
 When all bounds filled, hitting sumbit button will save the keys in vocabulary and for next image it will try to annotate automatically.
 
 Vocabulary file and json annotation files will saved each sumbit event.
