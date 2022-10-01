@@ -1,16 +1,18 @@
 {
     "r_number_key": [
         "customer invoices",
-        "invoices"
+        "invoices",
     ],
     "salesperson_key": [
         "salesperson"
     ],
     "client_name_key": [
         "customer",
-        "customer"
+        "customer",
+        "bill to"
     ],
     "total_amount_key": [
-        "total:"
+        "total:",
+        "total"
     ]
 }
