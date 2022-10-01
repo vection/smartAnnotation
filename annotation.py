@@ -29,7 +29,7 @@ class AnnotationTool:
         temp_bounds = BoundBox.pytesseract_boxes(data)
         cleaned_bounds = self.clean_ocr(temp_bounds)
         if merge:
-            cleaned_bounds = BoundBox.merge_box(cleaned_bounds, dx=0.5, vx=0, merge_box_inside=False)
+            cleaned_bounds = BoundBox.merge_box(cleaned_bounds, dx=0.5, merge_box_inside=False)
         return cleaned_bounds
 
     def search_by_vocab(self, bounds, name):
@@ -86,7 +86,7 @@ class AnnotationTool:
         return new_bounds
 
     def search_bound(self, bounds, x, y, value_type=None):
-        bounds = BoundBox.merge_box(bounds, dx=0.5, vx=0, merge_box_inside=False)
+        bounds = BoundBox.merge_box(bounds, dx=0.5, merge_box_inside=False)
         if value_type and value_type in self.data_types:
             value_type = self.data_types[value_type]
         for b in bounds:
@@ -97,7 +97,7 @@ class AnnotationTool:
 
     def find_alternative_key(self, bounds, value_bound):
         options = []
-        bounds = BoundBox.merge_box(bounds, dx=0.8, vx=0, merge_box_inside=False)
+        bounds = BoundBox.merge_box(bounds, dx=0.8, merge_box_inside=False)
         # check for left keys
         for bound in bounds:
             if not isinstance(bound, BoundBox) or not isinstance(value_bound, BoundBox):
@@ -139,16 +139,17 @@ class AnnotationTool:
         #                 filtered_options.append(opt)
         print("Last ", options)
         if len(options) == 2:
-            return BoundBox.merge_box(options, dx=100, vx=200)
+            return BoundBox.merge_box(options, dx=100)
         return options
 
 
-def add_annotation_starter(anno, bounds):
+def add_annotation_starter(bounds):
+    print("Starter!!!")
     for key in anno.vocab.keys():
         options_for_key = []
         for b in bounds:
             if any([w in b.text_value.lower() for w in anno.vocab[key]]):
-                new_tagged_item = dict()
+                new_tagged_item = {}
                 new_tagged_item['x'] = b.p1.x
                 new_tagged_item['y'] = b.p1.y
                 new_tagged_item['label'] = key
@@ -157,16 +158,17 @@ def add_annotation_starter(anno, bounds):
                 new_tagged_item['height'] = abs(b.p4.y - b.p1.y)
                 options_for_key.append(new_tagged_item)
 
+    print("End of starter: ", options_for_key)
     return options_for_key
 
 
-def add_annotation(anno, path, bboxes, starter=False):
-    bbox_list = bboxes
+def add_annotation(anno,bboxes, starter=False):
+    bbox_list = deepcopy(bboxes)
 
     def find_item(bbox_l, val):
-        for bb in bbox_l:
+        for ind, bb in enumerate(bbox_l):
             if bb['label'] == val:
-                return bb
+                return bb, ind
         return None
 
     a_bounds = anno.ocr(path, merge=True)
@@ -179,7 +181,7 @@ def add_annotation(anno, path, bboxes, starter=False):
 
     for v in value_labels:
         if not any([v.replace("_", "") in key.replace("_", "") for key in keys_labels]):
-            item_bbox = find_item(bbox_list, v)
+            item_bbox, index = find_item(bbox_list, v)
             item_center_x = item_bbox['x'] + int(item_bbox['width'] / 2)
             item_center_y = item_bbox['y'] + item_bbox['height']
             founded_bound = anno.search_bound(a_bounds, item_center_x, item_center_y, value_type=v)
@@ -191,7 +193,7 @@ def add_annotation(anno, path, bboxes, starter=False):
             if len(keys_options) > 0 and keys_options[0] is not None:
                 #                 center_key_options = (abs(int((keys_options[0].p1.x + keys_options[0].p2.x) / 2)),
                 #                                       abs(int((keys_options[0].p1.y + keys_options[0].p4.y) / 2)))
-                new_tagged_item = dict()
+                new_tagged_item = {}
                 new_tagged_item['x'] = keys_options[0].p1.x
                 new_tagged_item['y'] = keys_options[0].p1.y
                 new_tagged_item['label'] = v + "_key"
@@ -205,8 +207,29 @@ def add_annotation(anno, path, bboxes, starter=False):
                 item_bbox['y'] = founded_bound.p1.y
                 item_bbox['width'] = abs(founded_bound.p2.x - founded_bound.p1.x)
                 item_bbox['height'] = abs(founded_bound.p4.y - founded_bound.p1.y)
+                bbox_list.pop(index)
+                bbox_list.append(item_bbox)
+
+    # find key OCR value
+    # for key in keys_labels:
+    for box in bbox_list:
+        if 'value' not in box:
+            item_center_x = box['x'] + int(box['width'] / 2)
+            item_center_y = box['y'] + box['height']
+            founded_bound = anno.search_bound(a_bounds, item_center_x, item_center_y, value_type='text')
+            print("Key Founded ", founded_bound)
+            if founded_bound:
+                box['value'] = founded_bound.text_value.lower()
 
     return bbox_list
-#
+
+
+# path = r'E:\Aviv\ocr_project\1_Images\1_Images\20210428_151140.jpg'
 # path = 'images/10.jpg'
 # anno = AnnotationTool(vocab='vocab.json')
+# a_bounds = anno.ocr(path, merge=True)
+# for i, b in enumerate(a_bounds):
+#     print(i, b)
+
+# keys_options = anno.find_alternative_key(a_bounds, a_bounds[0])
+# print(keys_options)

@@ -1,11 +1,19 @@
 [
     {
-        "x": 20,
-        "y": 18,
-        "label": "r_number_key",
-        "value": "Customer Invoices",
-        "width": 186,
-        "height": 14
+        "x": 922,
+        "y": 835,
+        "label": "total_amount_key",
+        "value": "Total:",
+        "width": 36,
+        "height": 12
+    },
+    {
+        "x": 922,
+        "y": 835,
+        "label": "total_amount_key",
+        "value": "Total:",
+        "width": 36,
+        "height": 12
     },
     {
         "x": 199,
@@ -16,6 +24,38 @@
         "value": "/ INV/2018/0004"
     },
     {
+        "x": 17,
+        "y": 12,
+        "width": 185,
+        "height": 26,
+        "label": "r_number_key",
+        "value": "invoices"
+    },
+    {
+        "x": 37,
+        "y": 256,
+        "label": "client_name_key",
+        "value": "INV/2018/0004 Demo IGST Registered Customer",
+        "width": 70,
+        "height": 17
+    },
+    {
+        "x": 191,
+        "y": 259,
+        "width": 224,
+        "height": 12,
+        "label": "client_name",
+        "value": "Registered"
+    },
+    {
+        "x": 976,
+        "y": 830,
+        "width": 104,
+        "height": 29,
+        "label": "total_amount",
+        "value": "404,600.00 &"
+    },
+    {
         "x": 728,
         "y": 397,
         "width": 84,
@@ -24,27 +64,20 @@
         "value": "Administrator"
     },
     {
-        "x": 554,
-        "y": 393,
+        "x": 546,
+        "y": 384,
+        "width": 106,
+        "height": 36,
         "label": "salesperson_key",
-        "value": "Regular",
-        "width": 95,
-        "height": 28
+        "value": "salesperson"
     },
     {
-        "x": 204,
-        "y": 259,
-        "width": 206,
-        "height": 9,
-        "label": "client_name",
-        "value": "Demo"
-    },
-    {
-        "x": 37,
-        "y": 252,
-        "label": "client_name_key",
-        "value": "INV/2018/0004 Demo IGST Registered Customer",
-        "width": 68,
-        "height": 16
+        "x": 720,
+        "y": 251,
+        "width": 87,
+        "height": 25,
+        "label": "date",
+        "status": 0,
+        "value": "04/10/2018"
     }
 ]

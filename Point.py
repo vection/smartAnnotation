@@ -16,14 +16,10 @@ class Point:
 
     @x.setter
     def x(self, x_value):
-        # if not isinstance(x_value, (int, )):
-        #     raise TypeError("x value can only be an int not a {}".format(type(x_value)))
         self._x = x_value
 
     @y.setter
     def y(self, y_value):
-        # if not isinstance(y_value, (int, )):
-        #     raise TypeError("y value can only be an int not a {}".format(type(y_value)))
         self._y = y_value
 
     def __repr__(self):

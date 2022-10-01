@@ -492,22 +492,6 @@ class BoundBox:
 
         return dx >= y
 
-
-    @staticmethod
-    def do_y_match(a, dy=np.inf, xmatch=0.1):
-        result_matrix = np.zeros([a.shape[0], a.shape[0]])  # + -1
-
-        for offset in range(1, np.ceil(a.shape[0] / 2).astype(int) + 1):
-
-            b = np.roll(a, offset, axis=0)
-
-            result = BoundBox.bb_verticle_compare_numpy(a, b, dy=dy, xmatch=xmatch)
-            for i, item in enumerate(result):
-                if item >= 0:
-                    result_matrix[i, i - offset] = 1
-
-        return result_matrix
-
     @staticmethod
     def find_connected_compunents(result_matrix):
         d_graph = {i: set() for i in range(result_matrix.shape[0])}
@@ -539,12 +523,12 @@ class BoundBox:
         return res
 
     @staticmethod
-    def bb_intersection_numpy_smallest(a, b):
+    def check_intersections(a, b):
 
         """
         a: list of box coordintes [[x0,y0,x3,y3], ...]
             where x0,y0 are the coordinates of the top left corner of a box, x3, y3 are the right bottom corner of the box
-        b: the same list but shifted by N boxes
+        b: shifted by N boxes
         """
 
         # get min/max of relevant coordinates to find intersection
@@ -570,24 +554,20 @@ class BoundBox:
         return result
 
     @staticmethod
-    def find_intersections_indecies(a):
+    def check_multiple_bounds(a):
         """
         this function returns which bounding boxes intersect and by how much
         coords: list of box coordintes [[x0,y0,x3,y3], ...]
             where x0,y0 are the coordinates of the top left corner of a box, x3, y3 are the right bottom corner of the box
         returns: a matrix of relative intesection area of smallest box
         """
-
-        intersections = np.array([])
-        intersections_precentage = np.array([])
-
         result_matrix = np.zeros([a.shape[0], a.shape[0]])
 
         for offset in range(1, np.floor(a.shape[0] / 2).astype(int) + 1):
 
             b = np.roll(a, offset, axis=0)
 
-            ab_result = BoundBox.bb_intersection_numpy_smallest(a, b)
+            ab_result = BoundBox.check_intersections(a, b)
 
             for i, result in enumerate(ab_result):
                 result_matrix[i][(i - offset) % a.shape[0]] = result
@@ -596,16 +576,13 @@ class BoundBox:
 
 
     @staticmethod
-    def merge_box(box_list, dx=1, vx=30,merge_box_inside=True):
+    def merge_box(box_list, dx=1,merge_box=True):
         """
         This function is used to merge similar kind of text in an image and create meaningful sentences
         :param box_list: list of box objects that need to be merged
         :param dx: ratio of distance between boxes to the height of text box, keep 1 as default
         :return: list of box objects where certain boxes are merged
-        # TODO : The below implementation is not optimal or the best. Need to change it to clustering
         """
-        is_number = lambda text: text.replace('.', '').replace(',', '').isdigit()
-
         # sort the boxlist by the the x value of point p1
         box_list.sort(key=lambda k: k.p1.x)
 
@@ -643,37 +620,8 @@ class BoundBox:
 
             results.append(current_box)
 
-        if vx > 0:
-            results.sort(key=lambda k: k.p1.y)
-            box_list = results
-            # set same number of flags to zero
-            process_flag = [False] * len(box_list)
-            results = []
-
-            np_items = np.array([[box.p1.x, box.p1.y, box.p3.x, box.p3.y] for box in box_list])
-
-            vymatrix = BoundBox.do_y_match(np_items, dy=vx, xmatch=0.1)
-
-            connected = BoundBox.find_connected_compunents(vymatrix)
-
-            for gi, group in enumerate(connected):
-                current_box_index = group[0]
-                current_box = box_list[current_box_index]
-
-                for ii, other_box_index in enumerate(group):
-                    if ii != 0:
-                        b = box_list[other_box_index]
-                        current_box = BoundBox.vertical_merge(current_box, b)
-                        merge_path.append(b)
-
-                results.append(current_box)
-
-        # if merge_box_inside:
-        #     results = BoundBox.merge_boxes_inside(results)
-
-        if merge_box_inside:
+        if merge_box:
             for i in range(4):
-
                 # set same number of flags to zero
                 results.sort(key=lambda k: k.p1.y)
                 box_list = results
@@ -681,7 +629,7 @@ class BoundBox:
                 results = []
 
                 np_items = np.array([[box.p1.x, box.p1.y, box.p3.x, box.p3.y] for box in box_list])
-                intersection_matrix = BoundBox.find_intersections_indecies(np_items)
+                intersection_matrix = BoundBox.check_multiple_bounds(np_items)
                 connected = BoundBox.find_connected_compunents(intersection_matrix)
 
                 for gi, group in enumerate(connected):
