@@ -2,6 +2,8 @@
     "r_number_key": [
         "customer invoices",
         "invoices",
+        "invoice",
+        "invoice #"
     ],
     "salesperson_key": [
         "salesperson"
@@ -9,7 +11,8 @@
     "client_name_key": [
         "customer",
         "customer",
-        "bill to"
+        "bill to",
+        "smb behtidy ke)"
     ],
     "total_amount_key": [
         "total:",

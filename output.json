@@ -1,59 +1,58 @@
 [
     {
-        "x": 714,
-        "y": 31,
-        "width": 109,
-        "height": 27,
-        "label": "r_number",
-        "value": "8020001544"
-    },
-    {
-        "x": 714,
-        "y": 31,
-        "width": 109,
-        "height": 27,
-        "label": "r_number",
-        "value": "8020001544"
-    },
-    {
-        "x": 599,
-        "y": 29,
-        "width": 89,
-        "height": 27,
-        "label": "r_number_key",
-        "value": "invoice date:"
-    },
-    {
-        "x": 896,
-        "y": 1222,
-        "width": 94,
-        "height": 31,
+        "x": 852,
+        "y": 857,
+        "width": 106,
+        "height": 36,
         "label": "total_amount",
-        "status": 0,
-        "value": "$3,815.20"
+        "value": "3,500.00"
     },
     {
-        "x": 784,
-        "y": 1223,
-        "width": 62,
-        "height": 28,
+        "x": 852,
+        "y": 857,
+        "width": 106,
+        "height": 36,
+        "label": "total_amount",
+        "value": "3,500.00"
+    },
+    {
+        "x": 600,
+        "y": 860,
+        "width": 79,
+        "height": 35,
         "label": "total_amount_key",
         "value": "total"
     },
     {
-        "x": 35,
-        "y": 198,
-        "width": 143,
-        "height": 19,
-        "label": "client_name",
-        "value": "Clock"
+        "x": 71,
+        "y": 304,
+        "label": "client_name_key",
+        "value": "smb behtidy Ke)",
+        "width": 132,
+        "height": 25
     },
     {
-        "x": 7,
-        "y": 157,
-        "width": 74,
-        "height": 29,
-        "label": "client_name_key",
-        "value": "bill to"
+        "x": 126,
+        "y": 299,
+        "width": 77,
+        "height": 34,
+        "label": "client_name",
+        "value": "behtidy Ke)"
+    },
+    {
+        "x": 639,
+        "y": 333,
+        "width": 72,
+        "height": 21,
+        "label": "r_number",
+        "value": "2034"
+    },
+    {
+        "x": 625,
+        "y": 291,
+        "width": 98,
+        "height": 32,
+        "label": "r_number_key",
+        "value": "invoice #"
     }
 ]
