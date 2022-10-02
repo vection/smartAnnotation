@@ -23,6 +23,15 @@ Vocabulary file and json annotation files will saved each sumbit event.
 
 Note that rendering is quite unstable and may affect some unrelated results.
 
+## Installation
+- Make sure you have pytesseract ocr engine installed, you have to specify tesseract_cmd path in the code.
+- Install all requirements.txt libraries 
+- Configure testwidget, files_path, annotation tool constructor (last cell)
+- Run container  
+
+## Supported features
+- Key finder checkbox - enable/disable key finder for each marked value
+- Starter feature - enable/disable finding possible keys from vocabulary and annotate it automatically - triggered after first mark
 
 ## Output format
 ### Annotation file
