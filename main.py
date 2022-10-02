@@ -6,24 +6,15 @@ import os
 import json
 import base64
 import time
-
 from multiprocessing import Value
-from threading import Lock
 from pdf2image import convert_from_bytes
 
 ###########################################
 # this code should run in cell of jupyter notebook!
 ###########################################
 
-
-
-
+# required convertion functions
 def encode_image(filepath):
-    '''
-    encoding image to string
-    :param filepath:
-    :return: encoded image
-    '''
     global current_image
     im = Image.open(filepath)
     with open(filepath, 'rb') as f:
@@ -32,14 +23,7 @@ def encode_image(filepath):
     current_image = im
     return "data:image/jpg;base64," + encoded
 
-
 def encode_pdf(file_path):
-    '''
-    encoding pdf to string
-    Support only first page of pdf
-    :param file_path:
-    :return: encoded image
-    '''
     global current_image
     with open(file_path, 'rb') as f:
         image_bytes = f.read()
@@ -48,10 +32,13 @@ def encode_pdf(file_path):
     imgs[0].save('temp.jpg')
     return encode_image('temp.jpg')
 
-files_path = "images/"
+
+# set folder of pdf files
+files_path = "E://Aviv//ocr_project//archive (2)//InvoiceData//InvoiceDataPDF//"
 current_image = None
+# set testwidget initial settings
 testwidget = BBoxWidget(
-    image=encode_pdf(files_path + "10.jpg"),
+    image=encode_pdf(files_path + "97.pdf"),
     classes=['date', 'r_number', 'client_name', 'total_amount', 'r_number_key', 'total_amount_key', 'salesperson',
              'salesperson_key', 'client_name_key'],
 )
@@ -65,14 +52,14 @@ w_out = widgets.Output()
 start = False
 
 
+
+
 # event to handle ocr and annotation changes
 def on_bbox_change(change):
     global testwidget, number_of_boxes, starter, start, current_image
     try:
         w_out.clear_output(wait=True)
         with w_out:
-            print(json.dumps(change['new'], indent=4))
-            print(current_image)
             if number_of_boxes.value > 0 and len(testwidget.bboxes) < number_of_boxes.value - 1:
                 return False
             if start:
@@ -85,7 +72,6 @@ def on_bbox_change(change):
             render(bboxes_all)
             time.sleep(2)
             start = False
-            # os.kill(os.getpid(),SIGABRT)
 
     except Exception as e:
         print("Exception! ", e)
@@ -104,7 +90,6 @@ def render(bboxes):
 
         return aa
 
-    print("Im rendering", number_of_boxes, len(bboxes))
     if len(bboxes) > 1:
         testwidget.bboxes = swapPositions(bboxes, 0, 1)
         number_of_boxes.value = len(testwidget.bboxes)
@@ -122,7 +107,6 @@ def change_key_finder(change):
 testwidget.observe(on_bbox_change, names=['bboxes'])
 
 key_finder_checkbox.observe(change_key_finder, names=['value'])
-# testwidget.attach(key_finder_checkbox, name='key_finder')
 
 w_container = widgets.VBox([
     key_finder_checkbox,
@@ -134,6 +118,7 @@ w_container = widgets.VBox([
 
 @testwidget.on_skip
 def skip():
+    global starter
     files_progress.value += 1
     # open new image in the widget
     image_file = files[files_progress.value]
@@ -141,17 +126,15 @@ def skip():
         testwidget.image = encode_pdf(os.path.join(files_path, image_file))
     else:
         testwidget.image = encode_image(os.path.join(files_path, image_file))
-    # here we assign an empty list to bboxes but
-    # we could also run a detection model on the file
-    # and use its output for creating inital bboxes
     testwidget.bboxes = []
+    starter = False
 
 
 @testwidget.on_submit
 def submit():
     global anno
     print("Submit start")
-    # image_file = files[w_progress.value]
+    image_file = files[files_progress.value]
     for item in testwidget.bboxes:
         if 'key' not in item['label']:
             continue
@@ -169,7 +152,7 @@ def submit():
 
     # save annotations for current image
     with open(save_path, 'w') as f:
-        json.dump(testwidget.bboxes, f, indent=4)
+        json.dump({image_file: testwidget.bboxes}, f, indent=4)
 
     if save_vocabs:
         with open(save_vocab_path, 'w') as f:
@@ -185,7 +168,6 @@ save_path = 'output.json'
 save_vocab_path = 'vocab.json'
 save_vocabs = True
 word_vocab = {}
+# enable/disable automatically finding keys from vocabulary after first mark
 starter = True
-lock = Lock()
-shared_bboxes = []
 anno = AnnotationTool(vocab='vocab.json')
