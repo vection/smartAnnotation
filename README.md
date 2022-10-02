@@ -2,8 +2,11 @@
 ### Easy and smart annotation tool based on jupyter notebook 
 
 Fun tool to annotate your documents using jupter notebook, if you have low volume of data and you want easy, smart and free annotation tool you arrived to the right place. This tool based on jupyter-bbox-widget.
-The motivation is to create smart tool that learns from each annotation he gets.
-This tool designed for Key-value assignments or cases of correlations between key and value on coordinates axis.
+The motivation is to create smart tool in jupter notebook environment that supports OCR annotation.
+
+The extra feature designed for Key-value assignments or cases of correlations between key and value on coordinates axis.
+By enabling Key Finder checkbox the script will try to find best options for his key.
+
 
 ## How it works :vulcan_salute:
 First we set BBoxWidget with correct parameters which is list of images (depending on your sitatuation) and all classes.
