@@ -1,14 +1,10 @@
 import cv2
 import numpy as np
-from math import sin, cos, atan, degrees, sqrt
+from math import degrees
 import matplotlib.pyplot as plt
-import xml.etree.ElementTree as ET
-import re
 from Point import Point
 
 
-
-#
 def min_value(x, y):
     return min(i for i in [x, y] if i is not None)
 
@@ -16,95 +12,14 @@ def min_value(x, y):
 def max_value(x, y):
     return max(i for i in [x, y] if i is not None)
 
+
 class BoundBox:
     def __init__(self, p1, p2, p3, p4, text_value=''):
-        self._p1, self._p2, self._p3, self._p4 = p1,p2,p3,p4 #self.sort_corners(p1, p2, p3, p4)
+        self._p1, self._p2, self._p3, self._p4 = p1, p2, p3, p4
         self._text_value = text_value
-
 
     def to_dict(self):
         return {'p1': self._p1, 'p2': self._p2, 'p3': self._p3, 'p4': self._p4, 'text': self.text_value}
-
-    def sort_points(self):
-        """
-        sort the points of the box after transformations
-        :return:
-        """
-        self._p1, self._p2, self._p3, self._p4 = self.sort_corners(self._p1, self._p2, self._p3, self._p4)
-
-    @staticmethod
-    def sort_corners(p1, p2, p3, p4):
-        """
-        sort the corners based on top-right, top-left, bottom-right, bottom left as p1, p2, p3 and p4
-        :param p1: point 1
-        :param p2: point 2
-        :param p3: point 3
-        :param p4: point 4
-        :return: tuple of corners in sorted order
-        """
-
-        # if any of the values is null return without sorting
-        # this is to avoid None comparisons in case of void boxes
-        if not any((p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, p4.x, p4.y)):
-            return p1, p2, p3, p4
-
-        box = np.zeros((4, 2), dtype="int32")
-        box[0] = [p1.x, p1.y]
-        box[1] = [p2.x, p2.y]
-        box[2] = [p3.x, p3.y]
-        box[3] = [p4.x, p4.y]
-
-        p_sum = box.sum(axis=1)
-        p_diff = np.diff(box, axis=1)
-
-        # points with max sum is bottom right and least sum is top left
-        min_sum = min(p_sum)
-        max_sum = max(p_sum)
-
-        min_sum_index = np.where(p_sum == min_sum)[0]
-        max_sum_index = np.where(p_sum == max_sum)[0]
-
-        # points with least sum is top left
-        if len(min_sum_index) > 1:
-            # if more than one value with the same min sum exists we take the one with minimum y - x
-
-            top_left_index = min_sum_index[0] if p_diff[min_sum_index[0]] < p_diff[min_sum_index[1]] \
-                else min_sum_index[1]
-
-        else:
-            top_left_index = min_sum_index[0]
-
-        if len(max_sum_index) > 1:
-            # if more than one value with the same max sum exists we take the one with maximum y - x bottom right
-            bottom_right_index = max_sum_index[0] if p_diff[max_sum_index[0]] > p_diff[max_sum_index[1]] \
-                else max_sum_index[1]
-        else:
-            bottom_right_index = max_sum_index[0]
-
-        top_left = box[top_left_index]
-        bottom_right = box[bottom_right_index]
-
-        remaining_box = np.delete(box, [top_left_index, bottom_right_index], axis=0)
-
-        p_diff = np.diff(remaining_box, axis=1)
-
-        # "y-x" is largest for bottom left and lowest for top right
-        min_diff = min(p_diff)
-
-        top_right_index = np.where(p_diff == min_diff)[0][0]
-        # is one is top right the remaining one is top left
-        bottom_left_index = 1 - top_right_index
-
-        top_right = remaining_box[top_right_index]
-        bottom_left = remaining_box[bottom_left_index]
-
-        p1 = Point(int(top_left[0]), int(top_left[1]))
-        p2 = Point(int(top_right[0]), int(top_right[1]))
-
-        p3 = Point(int(bottom_right[0]), int(bottom_right[1]))
-        p4 = Point(int(bottom_left[0]), int(bottom_left[1]))
-
-        return p1, p2, p3, p4
 
     def __str__(self):
         return "{}".format(self._text_value)
@@ -143,7 +58,6 @@ class BoundBox:
         merged_box = BoundBox(p1, p2, p3, p4, new_text.strip())
         return merged_box
 
-
     @classmethod
     def create_box(cls, x1, y1, x2, y2, x3, y3, x4, y4, text_value=None):
 
@@ -153,7 +67,6 @@ class BoundBox:
         p4 = Point(x4, y4)
 
         return cls(p1, p2, p3, p4, text_value)
-
 
     @classmethod
     def pytesseract_boxes(cls, data):
@@ -201,7 +114,6 @@ class BoundBox:
         p4 = Point(corner_1.x, corner_2.y)
 
         return BoundBox(p1, p2, p3, p4, text_value)
-
 
     def scale_box(self, ratio_w, ratio_h):
 
@@ -385,7 +297,6 @@ class BoundBox:
         :param box2: right side box
         :param dx: ratio of distance between boxes to the height of text box
         :return: True or False whether they belong in the same line
-        # TODO : In the current implementation the checking of y axis is not proper for slopes. need to change it
         """
 
         if dx <= 0:
@@ -574,9 +485,8 @@ class BoundBox:
 
         return result_matrix
 
-
     @staticmethod
-    def merge_box(box_list, dx=1,merge_box=True):
+    def merge_box(box_list, dx=1, merge_box=True):
         """
         This function is used to merge similar kind of text in an image and create meaningful sentences
         :param box_list: list of box objects that need to be merged
@@ -644,8 +554,6 @@ class BoundBox:
                             merge_path.append(b)
 
                     results.append(current_box)
-
-
 
         results.sort(key=lambda k: k.p1.y)
 

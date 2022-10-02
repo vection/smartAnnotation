@@ -1,53 +1,89 @@
 from PIL.Image import Image
-
+from annotation import add_annotation, AnnotationTool
 from widget import BBoxWidget
 import ipywidgets as widgets
 import os
 import json
 import base64
-from annotation import add_annotation
-from multiprocessing import Pool, Value
+import time
+
+from multiprocessing import Value
+from threading import Lock
+from pdf2image import convert_from_bytes
 
 ###########################################
 # this code should run in cell of jupyter notebook!
 ###########################################
 
-# encoding image function
+
+
+
 def encode_image(filepath):
+    '''
+    encoding image to string
+    :param filepath:
+    :return: encoded image
+    '''
+    global current_image
     im = Image.open(filepath)
     with open(filepath, 'rb') as f:
         image_bytes = f.read()
     encoded = str(base64.b64encode(image_bytes), 'utf-8')
+    current_image = im
     return "data:image/jpg;base64," + encoded
 
-# declaring of widget object
+
+def encode_pdf(file_path):
+    '''
+    encoding pdf to string
+    Support only first page of pdf
+    :param file_path:
+    :return: encoded image
+    '''
+    global current_image
+    with open(file_path, 'rb') as f:
+        image_bytes = f.read()
+    imgs = convert_from_bytes(image_bytes, dpi=120,
+                              poppler_path="D://Downloads//poppler-0.68.0_x86//poppler-0.68.0\\bin")
+    imgs[0].save('temp.jpg')
+    return encode_image('temp.jpg')
+
+files_path = "images/"
+current_image = None
 testwidget = BBoxWidget(
-    image=encode_image('images/10.jpg'),
+    image=encode_pdf(files_path + "10.jpg"),
     classes=['date', 'r_number', 'client_name', 'total_amount', 'r_number_key', 'total_amount_key', 'salesperson',
              'salesperson_key', 'client_name_key'],
 )
+files_progress = widgets.IntProgress(value=0, max=len(files_path), description='Progress')
+
+key_finder_checkbox = widgets.Checkbox(value=True, description='Key finder')
 
 number_of_boxes = Value('d', 0)
-
+files = os.listdir(files_path)
 w_out = widgets.Output()
 start = False
 
+
 # event to handle ocr and annotation changes
 def on_bbox_change(change):
-    global testwidget, number_of_boxes, starter, start
+    global testwidget, number_of_boxes, starter, start, current_image
     try:
         w_out.clear_output(wait=True)
         with w_out:
+            print(json.dumps(change['new'], indent=4))
+            print(current_image)
             if number_of_boxes.value > 0 and len(testwidget.bboxes) < number_of_boxes.value - 1:
                 return False
             if start:
                 return False
             start = True
-            bboxes_all = add_annotation(testwidget.bboxes, starter)
+            bboxes_all = add_annotation(current_image, testwidget.bboxes, starter)
             if starter:
                 starter = False
             bboxes_all = [{**bbox} for bbox in bboxes_all]
             render(bboxes_all)
+            time.sleep(2)
             start = False
             # os.kill(os.getpid(),SIGABRT)
 
@@ -75,12 +111,40 @@ def render(bboxes):
     # return bboxes
 
 
+def change_key_finder(change):
+    global key_finder_checkbox, anno
+    if change['new']:
+        anno.key_find = True
+    else:
+        anno.key_find = False
+
+
 testwidget.observe(on_bbox_change, names=['bboxes'])
 
+key_finder_checkbox.observe(change_key_finder, names=['value'])
+# testwidget.attach(key_finder_checkbox, name='key_finder')
+
 w_container = widgets.VBox([
+    key_finder_checkbox,
+    files_progress,
     testwidget,
     w_out,
 ])
+
+
+@testwidget.on_skip
+def skip():
+    files_progress.value += 1
+    # open new image in the widget
+    image_file = files[files_progress.value]
+    if 'pdf' in image_file:
+        testwidget.image = encode_pdf(os.path.join(files_path, image_file))
+    else:
+        testwidget.image = encode_image(os.path.join(files_path, image_file))
+    # here we assign an empty list to bboxes but
+    # we could also run a detection model on the file
+    # and use its output for creating inital bboxes
+    testwidget.bboxes = []
 
 
 @testwidget.on_submit
@@ -113,7 +177,7 @@ def submit():
 
     print("Saved!")
     # move on to the next file
-    # skip()
+    skip()
 
 
 # settings for vocabulary and annotation file
@@ -122,4 +186,6 @@ save_vocab_path = 'vocab.json'
 save_vocabs = True
 word_vocab = {}
 starter = True
-
+lock = Lock()
+shared_bboxes = []
+anno = AnnotationTool(vocab='vocab.json')
