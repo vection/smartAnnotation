@@ -1,58 +1,60 @@
-[
-    {
-        "x": 852,
-        "y": 857,
-        "width": 106,
-        "height": 36,
-        "label": "total_amount",
-        "value": "3,500.00"
-    },
-    {
-        "x": 852,
-        "y": 857,
-        "width": 106,
-        "height": 36,
-        "label": "total_amount",
-        "value": "3,500.00"
-    },
-    {
-        "x": 600,
-        "y": 860,
-        "width": 79,
-        "height": 35,
-        "label": "total_amount_key",
-        "value": "total"
-    },
-    {
-        "x": 71,
-        "y": 304,
-        "label": "client_name_key",
-        "value": "smb behtidy Ke)",
-        "width": 132,
-        "height": 25
-    },
-    {
-        "x": 126,
-        "y": 299,
-        "width": 77,
-        "height": 34,
-        "label": "client_name",
-        "value": "behtidy Ke)"
-    },
-    {
-        "x": 639,
-        "y": 333,
-        "width": 72,
-        "height": 21,
-        "label": "r_number",
-        "value": "2034"
-    },
-    {
-        "x": 625,
-        "y": 291,
-        "width": 98,
-        "height": 32,
-        "label": "r_number_key",
-        "value": "invoice #"
-    }
-]
+{
+    "213.pdf": [
+        {
+            "x": 850,
+            "y": 931,
+            "label": "total_amount_key",
+            "value": "Total:",
+            "width": 24,
+            "height": 9
+        },
+        {
+            "x": 850,
+            "y": 931,
+            "label": "total_amount_key",
+            "value": "Total:",
+            "width": 24,
+            "height": 9
+        },
+        {
+            "x": 321,
+            "y": 133,
+            "label": "r_number_key",
+            "value": "Name",
+            "width": 31,
+            "height": 8
+        },
+        {
+            "x": 680,
+            "y": 128,
+            "width": 98,
+            "height": 28,
+            "label": "r_number",
+            "value": "id : 109015112146"
+        },
+        {
+            "x": 321,
+            "y": 133,
+            "label": "client_name_key",
+            "value": "Name",
+            "width": 31,
+            "height": 8
+        },
+        {
+            "x": 356,
+            "y": 122,
+            "width": 56,
+            "height": 28,
+            "label": "client_name",
+            "value": ": VASAV"
+        },
+        {
+            "x": 886,
+            "y": 927,
+            "width": 59,
+            "height": 16,
+            "label": "total_amount",
+            "value": "| 3,790.10"
+        }
+    ]
+}

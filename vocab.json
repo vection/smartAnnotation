@@ -3,7 +3,8 @@
         "customer invoices",
         "invoices",
         "invoice",
-        "invoice #"
+        "invoice #",
+        "name"
     ],
     "salesperson_key": [
         "salesperson"
@@ -12,7 +13,7 @@
         "customer",
         "customer",
         "bill to",
-        "smb behtidy ke)"
+        "name"
     ],
     "total_amount_key": [
         "total:",

@@ -13,6 +13,9 @@ pytesseract.pytesseract.tesseract_cmd = r'E:\Program Files\Tesseract-OCR\tessera
 # Example tesseract_cmd = r'C:\Program Files (x86)\Tesseract-OCR\tesseract'
 
 class AnnotationTool:
+    """
+        Simple and free annotation tool using OCR and cool extra features
+    """
     def __init__(self, ocr_path=None, vocab=None, key_find=False):
         if ocr_path:
             pytesseract.pytesseract.tesseract_cmd = ocr_path
@@ -28,6 +31,12 @@ class AnnotationTool:
         self.key_find = key_find
 
     def ocr(self, image, merge=False):
+        '''
+        OCR function
+        :param image: string/bytes
+        :param merge: merge box or not
+        :return:
+        '''
         if isinstance(image, PIL.JpegImagePlugin.JpegImageFile):
             data = pytesseract.image_to_data(image, output_type=pytesseract.Output.DICT)
         else:
@@ -40,6 +49,12 @@ class AnnotationTool:
         return cleaned_bounds
 
     def search_by_vocab(self, bounds, name):
+        '''
+        Simple searching function from list of bounding boxes
+        :param bounds:
+        :param name:
+        :return: bound box if found
+        '''
         founded = []
         for b in bounds:
             if any([word.lower() in b.text_value.lower() for word in self.vocab[name]]):
@@ -47,6 +62,13 @@ class AnnotationTool:
         return founded
 
     def check_valid(self, text, return_text=False, value_type=None):
+        '''
+        Simple function to check validation of text
+        :param text:
+        :param return_text:
+        :param value_type:
+        :return:
+        '''
         if value_type == 'number':
             text = text.replace(".", "").replace(",", "").replace(":", "").replace("/", "")
             pattern = re.compile("[0-9]+")
@@ -93,6 +115,14 @@ class AnnotationTool:
         return new_bounds
 
     def search_bound(self, bounds, x, y, value_type=None):
+        '''
+        Search bound function to match ocr to pixels
+        :param bounds: list of bounding boxes
+        :param x: x pixel value
+        :param y: y pixel value
+        :param value_type: text,number
+        :return: found bounding box or none
+        '''
         bounds = BoundBox.merge_box(bounds, dx=0.5, merge_box=False)
         if value_type and value_type in self.data_types:
             value_type = self.data_types[value_type]
@@ -104,6 +134,12 @@ class AnnotationTool:
         return None
 
     def find_alternative_key(self, bounds, value_bound):
+        '''
+        Searching the best key box to correlated value
+        :param bounds: list of bounding boxes
+        :param value_bound: boundbox
+        :return: list of bounding boxes
+        '''
         options = []
         bounds = BoundBox.merge_box(bounds, dx=0.8, merge_box=False)
         # check for left keys
@@ -152,7 +188,12 @@ class AnnotationTool:
 
 
 def add_annotation_starter(anno,bounds):
-    print("Starter!!!")
+    '''
+    Find options from vocabulary
+    :param anno: annotation tool object
+    :param bounds: list of bounding boxes
+    :return: new bboxes
+    '''
     for key in anno.vocab.keys():
         options_for_key = []
         for b in bounds:
@@ -171,6 +212,14 @@ def add_annotation_starter(anno,bounds):
 
 
 def add_annotation(anno,img_path, bboxes, starter=False):
+    '''
+    Annotation function to scan ocr
+    :param anno: annotation tool object
+    :param img_path: path to image
+    :param bboxes: current state of bboxes in widget
+    :param starter: either or not perform starter feature
+    :return: new bboxes
+    '''
     bbox_list = deepcopy(bboxes)
 
     def find_item(bbox_l, val):
