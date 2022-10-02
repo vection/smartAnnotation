@@ -11,7 +11,7 @@ By enabling Key Finder checkbox the script will try to find best options for his
 ## How it works :vulcan_salute:
 First we set BBoxWidget with correct parameters which is list of images (depending on your sitatuation) and all classes.
 
-In annotation tool class there are few types of values - number,text; this can help to filter final value that will be registered in dataset.
+In annotation tool class there are few types of values - number,text; this can help to filter final value that will be registered in annotation file.
 By default all values declared as text.
 
 After marking first VALUE class the tool tries to find the corresponding text value from ocr and record it in annotation file.
