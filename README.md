@@ -32,3 +32,9 @@ Note that rendering is quite unstable and may affect some unrelated results.
 ## Short video example
 https://user-images.githubusercontent.com/28596354/193272615-f105262c-c5da-43a6-aba8-875fb9256b1b.mp4
 
+## Libraries:
+
+[jupyter-bbox-widget](https://github.com/gereleth/jupyter-bbox-widget)
+
+[boundbox](https://github.com/akash1729/boundbox)
+
