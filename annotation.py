@@ -9,9 +9,6 @@ import PIL
 # If you don't have tesseract executable in your PATH, include the following:
 pytesseract.pytesseract.tesseract_cmd = r'E:\Program Files\Tesseract-OCR\tesseract'
 
-
-# Example tesseract_cmd = r'C:\Program Files (x86)\Tesseract-OCR\tesseract'
-
 class AnnotationTool:
     """
         Simple and free annotation tool using OCR and cool extra features
