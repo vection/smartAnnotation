@@ -16,7 +16,7 @@ By default all values declared as text.
 
 After marking first VALUE class the tool tries to find the corresponding text value from ocr and record it in annotation file.
 
-Extra feature available to detect also corresponding keys automatically using the vocabulary. 
+Extra feature available to detect also corresponding keys automatically using some logic and also support by vocabulary. 
 When all bounds filled, hitting sumbit button will save the keys in vocabulary and for next image it will try to annotate automatically.
 
 Vocabulary file and json annotation files will saved each sumbit event.
