@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 from math import degrees
 import matplotlib.pyplot as plt
-from Point import Point
+from point import Point
 
 
 def min_value(x, y):
